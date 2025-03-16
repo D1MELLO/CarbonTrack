@@ -17,13 +17,13 @@ import br.com.fiap.carbontrack.R
 @Composable
 fun ComponentButton(
     text: String,
-//    onClick: () -> Unit,
+    onClick: () -> Unit,
 //    modifier: Modifier = Modifier,
     backgroundColor: Color = colorResource(id = R.color.greenbtn_system),
     textColor: Color = Color.White
 ) {
     Button(
-        onClick = {},
+        onClick = onClick, // Corrigido: Chama o onClick passado como parâmetro
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)

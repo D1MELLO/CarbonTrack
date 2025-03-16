@@ -4,8 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import br.com.fiap.carbontrack.database.AppDatabase
+import kotlinx.coroutines.launch
 
-class LoginScreenViewModel: ViewModel() {
+class LoginScreenViewModel(private val database: AppDatabase) : ViewModel() {
+
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
@@ -33,5 +37,21 @@ class LoginScreenViewModel: ViewModel() {
     private fun isValidPassword(password: String): Boolean {
         val passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\",.<>/?]).{6,}\$"
         return password.matches(passwordRegex.toRegex())
+    }
+
+    fun login(onSuccess: () -> Unit, onError: () -> Unit) {
+        if (isEmailError || isPasswordError) {
+            onError()
+            return
+        }
+
+        viewModelScope.launch {
+            val user = database.userDao().getUser(email, password)
+            if (user != null) {
+                onSuccess()
+            } else {
+                onError()
+            }
+        }
     }
 }
