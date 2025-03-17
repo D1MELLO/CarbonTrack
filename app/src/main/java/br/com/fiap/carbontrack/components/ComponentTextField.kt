@@ -35,7 +35,9 @@ fun ComponentTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false,
     isError: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    textColor: Color,
+    placeholderColor: Color
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 

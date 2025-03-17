@@ -2,17 +2,11 @@ package br.com.fiap.carbontrack.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -31,6 +25,8 @@ import br.com.fiap.carbontrack.components.ComponentTextField
 import br.com.fiap.carbontrack.database.AppDatabase
 import br.com.fiap.carbontrack.factory.CadastroScreenViewModelFactory
 import br.com.fiap.carbontrack.ui.theme.Pridi
+import androidx.compose.runtime.remember
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun CadastroScreen(
@@ -60,7 +56,9 @@ fun CadastroScreen(
             .background(gradientBrush)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()), // Adiciona rolagem vertical
             verticalArrangement = Arrangement.Center
         ) {
             Image(
@@ -77,27 +75,59 @@ fun CadastroScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Orientação para o campo de nome
+            Text(
+                text = "Use apenas letras e espaços. Exemplo: João Silva",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de Nome
             ComponentTextField(
+                modifier = Modifier.padding(bottom = 8.dp),
                 value = viewModel.nome,
                 onValueChange = { viewModel.onNomeChange(it) },
                 label = "Nome",
                 placeholder = "Digite seu nome",
                 keyboardType = KeyboardType.Text,
                 isError = viewModel.isNomeError,
-                errorMessage = if (viewModel.isNomeError) "Nome inválido" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                errorMessage = if (viewModel.isNomeError) "Nome inválido. Use apenas letras e espaços." else null,
+                textColor = Color.White,
+                placeholderColor = Color.White.copy(alpha = 0.7f)
             )
+
+            // Orientação para o campo de e-mail
+            Text(
+                text = "Use um e-mail válido. Exemplo: joao.silva@email.com",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de E-mail
             ComponentTextField(
+                modifier = Modifier.padding(bottom = 8.dp),
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChange(it) },
                 label = "E-mail",
                 placeholder = "Digite seu e-mail",
                 keyboardType = KeyboardType.Email,
                 isError = viewModel.isEmailError,
-                errorMessage = if (viewModel.isEmailError) "E-mail inválido" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                errorMessage = if (viewModel.isEmailError) "E-mail inválido. Use um formato válido." else null,
+                textColor = Color.White,
+                placeholderColor = Color.White.copy(alpha = 0.7f)
             )
+
+            // Orientação para o campo de senha
+            Text(
+                text = "Use pelo menos 6 caracteres, incluindo letras maiúsculas, números e símbolos.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de Senha
             ComponentTextField(
+                modifier = Modifier.padding(bottom = 8.dp),
                 value = viewModel.senha,
                 onValueChange = { viewModel.onSenhaChange(it) },
                 label = "Senha",
@@ -105,10 +135,21 @@ fun CadastroScreen(
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
                 isError = viewModel.isSenhaError,
-                errorMessage = if (viewModel.isSenhaError) "Senha inválida" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                errorMessage = if (viewModel.isSenhaError) "Senha inválida. Use pelo menos 6 caracteres, incluindo letras maiúsculas, números e símbolos." else null,
+                textColor = Color.White,
+                placeholderColor = Color.White.copy(alpha = 0.7f)
             )
+
+            // Orientação para o campo de confirmar senha
+            Text(
+                text = "Repita a senha digitada acima.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de Confirmar Senha
             ComponentTextField(
+                modifier = Modifier.padding(bottom = 8.dp),
                 value = viewModel.confirmarSenha,
                 onValueChange = { viewModel.onConfirmarSenhaChange(it) },
                 label = "Confirmar Senha",
@@ -116,9 +157,11 @@ fun CadastroScreen(
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
                 isError = viewModel.isConfirmarSenhaError,
-                errorMessage = if (viewModel.isConfirmarSenhaError) "Senhas não coincidem" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                errorMessage = if (viewModel.isConfirmarSenhaError) "As senhas não coincidem." else null,
+                textColor = Color.White,
+                placeholderColor = Color.White.copy(alpha = 0.7f)
             )
+
             Spacer(modifier = Modifier.height(8.dp))
             ComponentButton(
                 onClick = {

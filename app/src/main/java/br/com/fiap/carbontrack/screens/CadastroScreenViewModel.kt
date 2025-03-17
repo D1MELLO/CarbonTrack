@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 class CadastroScreenViewModel(private val database: AppDatabase) : ViewModel() {
 
+    // Estados para os campos de entrada
     var nome by mutableStateOf("")
         private set
     var email by mutableStateOf("")
@@ -19,6 +20,8 @@ class CadastroScreenViewModel(private val database: AppDatabase) : ViewModel() {
         private set
     var confirmarSenha by mutableStateOf("")
         private set
+
+    // Estados para mensagens de erro
     var isNomeError by mutableStateOf(false)
         private set
     var isEmailError by mutableStateOf(false)
@@ -28,9 +31,10 @@ class CadastroScreenViewModel(private val database: AppDatabase) : ViewModel() {
     var isConfirmarSenhaError by mutableStateOf(false)
         private set
 
+    // Funções para atualizar os estados
     fun onNomeChange(newNome: String) {
         nome = newNome
-        isNomeError = newNome.isBlank()
+        isNomeError = !isValidName(newNome)
     }
 
     fun onEmailChange(newEmail: String) {
@@ -48,18 +52,35 @@ class CadastroScreenViewModel(private val database: AppDatabase) : ViewModel() {
         isConfirmarSenhaError = newConfirmarSenha != senha
     }
 
+    // Função para validar o nome
+    private fun isValidName(name: String): Boolean {
+        val nameRegex = "^[A-Za-zÀ-ú ]+\$" // Aceita letras e espaços
+        return name.isNotBlank() && name.matches(nameRegex.toRegex())
+    }
+
+    // Função para validar o e-mail
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
-        return email.matches(emailRegex.toRegex())
+        return email.isNotBlank() && email.matches(emailRegex.toRegex())
     }
 
+    // Função para validar a senha
     private fun isValidPassword(password: String): Boolean {
         val passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\",.<>/?]).{6,}\$"
-        return password.matches(passwordRegex.toRegex())
+        return password.isNotBlank() && password.matches(passwordRegex.toRegex())
     }
 
+    // Função para validar todos os campos
+    private fun validateFields(): Boolean {
+        return isValidName(nome) &&
+                isValidEmail(email) &&
+                isValidPassword(senha) &&
+                senha == confirmarSenha
+    }
+
+    // Função para cadastrar o usuário
     fun cadastrar(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        if (isNomeError || isEmailError || isSenhaError || isConfirmarSenhaError) {
+        if (!validateFields()) {
             onError("Preencha todos os campos corretamente.")
             return
         }

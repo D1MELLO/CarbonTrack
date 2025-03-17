@@ -10,37 +10,69 @@ import kotlinx.coroutines.launch
 
 class LoginScreenViewModel(private val database: AppDatabase) : ViewModel() {
 
+    // Estados para os campos de entrada
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
-    var isEmailError by mutableStateOf(false)
+
+    // Estados para mensagens de erro
+    var emailError by mutableStateOf<String?>(null)
         private set
-    var isPasswordError by mutableStateOf(false)
+    var passwordError by mutableStateOf<String?>(null)
         private set
 
+    // Funções para atualizar os campos e validar em tempo real
     fun onEmailChange(newEmail: String) {
         email = newEmail
-        isEmailError = !isValidEmail(newEmail)
+        emailError = validateEmail(newEmail)
     }
 
     fun onPasswordChange(newPassword: String) {
         password = newPassword
-        isPasswordError = !isValidPassword(newPassword)
+        passwordError = validatePassword(newPassword)
     }
 
+    // Validação de e-mail
+    private fun validateEmail(email: String): String? {
+        return when {
+            email.isBlank() -> "E-mail é obrigatório."
+            !isValidEmail(email) -> "E-mail inválido. Exemplo: usuario@exemplo.com"
+            else -> null
+        }
+    }
+
+    // Validação de senha
+    private fun validatePassword(password: String): String? {
+        return when {
+            password.isBlank() -> "Senha é obrigatória."
+            password.length < 6 -> "A senha deve ter pelo menos 6 caracteres."
+            !isValidPassword(password) -> "A senha deve conter letras, números e símbolos."
+            else -> null
+        }
+    }
+
+    // Verifica se o e-mail é válido
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
         return email.matches(emailRegex.toRegex())
     }
 
+    // Verifica se a senha é válida
     private fun isValidPassword(password: String): Boolean {
         val passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\",.<>/?]).{6,}\$"
         return password.matches(passwordRegex.toRegex())
     }
 
+    // Função de login
     fun login(onSuccess: () -> Unit, onError: () -> Unit) {
-        if (isEmailError || isPasswordError) {
+        // Valida os campos antes de prosseguir
+        val emailValidation = validateEmail(email)
+        val passwordValidation = validatePassword(password)
+
+        if (emailValidation != null || passwordValidation != null) {
+            emailError = emailValidation
+            passwordError = passwordValidation
             onError()
             return
         }
@@ -50,6 +82,8 @@ class LoginScreenViewModel(private val database: AppDatabase) : ViewModel() {
             if (user != null) {
                 onSuccess()
             } else {
+                emailError = "E-mail ou senha incorretos."
+                passwordError = "E-mail ou senha incorretos."
                 onError()
             }
         }

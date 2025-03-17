@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -85,17 +86,38 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Orientação para o campo de e-mail
+            Text(
+                text = "Insira um e-mail válido. Exemplo: usuario@exemplo.com",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de E-mail
             ComponentTextField(
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChange(it) },
                 label = "E-mail",
                 placeholder = "Digite seu e-mail",
                 keyboardType = KeyboardType.Email,
-                isError = viewModel.isEmailError,
-                errorMessage = if (viewModel.isEmailError) "E-mail inválido" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                isError = viewModel.emailError != null,
+                errorMessage = viewModel.emailError,
+                modifier = Modifier.padding(bottom = 8.dp),
+                textColor = Color.White, // Cor do texto
+                placeholderColor = Color.White.copy(alpha = 0.7f) // Cor do placeholder
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Orientação para o campo de senha
+            Text(
+                text = "A senha deve ter pelo menos 6 caracteres.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Campo de Senha
             ComponentTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.onPasswordChange(it) },
@@ -103,11 +125,16 @@ fun LoginScreen(
                 placeholder = "Digite sua senha",
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
-                isError = viewModel.isPasswordError,
-                errorMessage = if (viewModel.isPasswordError) "Senha inválida" else null,
-                modifier = Modifier.padding(bottom = 8.dp)
+                isError = viewModel.passwordError != null,
+                errorMessage = viewModel.passwordError,
+                modifier = Modifier.padding(bottom = 8.dp),
+                textColor = Color.White, // Cor do texto
+                placeholderColor = Color.White.copy(alpha = 0.7f) // Cor do placeholder
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Botão de Entrar
             ComponentButton(
                 onClick = {
                     viewModel.login(
