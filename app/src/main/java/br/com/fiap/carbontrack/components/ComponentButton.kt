@@ -18,7 +18,7 @@ import br.com.fiap.carbontrack.R
 fun ComponentButton(
     text: String,
     onClick: () -> Unit,
-//    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     backgroundColor: Color = colorResource(id = R.color.greenbtn_system),
     textColor: Color = Color.White
 ) {

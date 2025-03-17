@@ -64,7 +64,9 @@ fun CadastroScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo",
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp)
             )
             Text(
                 text = "CarbonTrack",
