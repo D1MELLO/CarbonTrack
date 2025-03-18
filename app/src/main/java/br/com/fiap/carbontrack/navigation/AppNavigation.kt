@@ -61,7 +61,9 @@ fun AppNavigation(navController: NavHostController) {
 
         // Rota para a ProgressoScreen
         composable("progresso") {
-            ProgressScreen()
+            ProgressScreen (onNavigateToCalculadora = { navController.navigate("calculadora") },
+                onNavigateToDesafios = { navController.navigate("desafios") },
+                onNavigateToProgresso = { navController.navigate("progresso") })
         }
     }
 }
