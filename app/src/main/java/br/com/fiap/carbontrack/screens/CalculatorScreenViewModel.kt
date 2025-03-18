@@ -5,6 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import br.com.fiap.carbontrack.api.CarbonFootprintApi
+import br.com.fiap.carbontrack.api.RetrofitClient
+import br.com.fiap.carbontrack.model.CarbonFootprintRequest
+import br.com.fiap.carbontrack.model.TransportData
+import br.com.fiap.carbontrack.model.EnergyData
+import br.com.fiap.carbontrack.model.FoodData
 
 class CalculatorScreenViewModel : ViewModel() {
     // Estados para os campos de entrada
@@ -52,6 +58,17 @@ class CalculatorScreenViewModel : ViewModel() {
     // Estado para feedback visual (sucesso/erro)
     private val _showSuccessMessage = MutableStateFlow(false)
     val showSuccessMessage: StateFlow<Boolean> get() = _showSuccessMessage
+
+    // Estado para indicar carregamento
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
+
+    // Estado para mensagens de erro
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    // Instância da API
+    private val carbonFootprintApi: CarbonFootprintApi = RetrofitClient.instance
 
     // Funções para atualizar os estados
     fun updateCarDistance(value: String) {
@@ -150,67 +167,72 @@ class CalculatorScreenViewModel : ViewModel() {
                 _dairyConsumptionError.value == null
     }
 
-    // Função para calcular a pegada de carbono
-    fun calculateCarbonFootprint() {
+    fun calculateCarbonFootprint(onSuccess: (Double) -> Unit, onError: (String) -> Unit) {
         if (validateFields()) {
             viewModelScope.launch {
-                val carDistanceValue = _carDistance.value.toDoubleOrNull() ?: 0.0
-                val busDistanceValue = _busDistance.value.toDoubleOrNull() ?: 0.0
-                val planeDistanceValue = _planeDistance.value.toDoubleOrNull() ?: 0.0
-                val electricityUsageValue = _electricityUsage.value.toDoubleOrNull() ?: 0.0
-                val meatConsumptionValue = _meatConsumption.value.toDoubleOrNull() ?: 0.0
-                val dairyConsumptionValue = _dairyConsumption.value.toDoubleOrNull() ?: 0.0
+                _isLoading.value = true
+                _errorMessage.value = null
 
-                val total = calculateTotalFootprint(
-                    carDistanceValue,
-                    busDistanceValue,
-                    planeDistanceValue,
-                    electricityUsageValue,
-                    meatConsumptionValue,
-                    dairyConsumptionValue
-                )
+                try {
+                    // Cria a requisição para a API
+                    val request = CarbonFootprintRequest(
+                        transport = TransportData(
+                            car_distance = _carDistance.value.toDoubleOrNull() ?: 0.0,
+                            bus_distance = _busDistance.value.toDoubleOrNull() ?: 0.0,
+                            plane_distance = _planeDistance.value.toDoubleOrNull() ?: 0.0
+                        ),
+                        energy = EnergyData(
+                            electricity_usage = _electricityUsage.value.toDoubleOrNull() ?: 0.0
+                        ),
+                        food = FoodData(
+                            meat_consumption = _meatConsumption.value.toDoubleOrNull() ?: 0.0,
+                            dairy_consumption = _dairyConsumption.value.toDoubleOrNull() ?: 0.0
+                        )
+                    )
 
-                _totalFootprint.value = total
-                _showSuccessMessage.value = true
+                    // Log da requisição
+                    println("Requisição enviada: $request")
+
+                    // Faz a requisição à API
+                    val response = carbonFootprintApi.calculateFootprint(request)
+
+                    // Log da resposta
+                    println("Resposta da API: $response")
+
+                    // Atualiza o estado com o resultado
+                    _totalFootprint.value = response.total_footprint
+                    _showSuccessMessage.value = true
+
+                    // Chama o callback de sucesso
+                    onSuccess(response.total_footprint)
+                } catch (e: Exception) {
+                    // Log do erro
+                    println("Erro na requisição: ${e.message}")
+
+                    // Trata erros
+                    _errorMessage.value = "Erro ao calcular a pegada de carbono: ${e.message}"
+                    onError(e.message ?: "Erro desconhecido")
+                } finally {
+                    _isLoading.value = false
+                }
             }
         } else {
-            _showSuccessMessage.value = false
+            _errorMessage.value = "Preencha todos os campos corretamente."
+            onError("Preencha todos os campos corretamente.")
         }
-    }
-
-    // Função para calcular a pegada de carbono total
-    private fun calculateTotalFootprint(
-        carDistance: Double,
-        busDistance: Double,
-        planeDistance: Double,
-        electricityUsage: Double,
-        meatConsumption: Double,
-        dairyConsumption: Double
-    ): Double {
-        // Fatores de emissão de CO2 (valores aproximados)
-        val carEmissionFactor = 0.12 // kg CO2 por km (carro a gasolina)
-        val busEmissionFactor = 0.05 // kg CO2 por km (ônibus)
-        val planeEmissionFactor = 0.25 // kg CO2 por km (avião)
-        val electricityEmissionFactor = 0.5 // kg CO2 por kWh
-        val meatEmissionFactor = 27.0 // kg CO2 por kg de carne
-        val dairyEmissionFactor = 2.0 // kg CO2 por kg de laticínios
-
-        // Cálculos
-        val transportFootprint = (carDistance * carEmissionFactor) +
-                (busDistance * busEmissionFactor) +
-                (planeDistance * planeEmissionFactor)
-
-        val energyFootprint = electricityUsage * electricityEmissionFactor
-
-        val foodFootprint = (meatConsumption * meatEmissionFactor) +
-                (dairyConsumption * dairyEmissionFactor)
-
-        // Total de pegada de carbono
-        return transportFootprint + energyFootprint + foodFootprint
     }
 
     // Função para resetar o feedback de sucesso
     fun resetSuccessMessage() {
         _showSuccessMessage.value = false
+    }
+
+    // Função para resetar mensagens de erro
+    fun resetErrorMessage() {
+        _errorMessage.value = null
+    }
+
+    fun setErrorMessage() {
+        TODO("Not yet implemented")
     }
 }

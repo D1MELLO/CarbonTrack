@@ -18,7 +18,9 @@ import br.com.fiap.carbontrack.components.ComponentButton
 import br.com.fiap.carbontrack.components.ComponentTextField
 import br.com.fiap.carbontrack.components.TopFrame
 import br.com.fiap.carbontrack.R
+import br.com.fiap.carbontrack.components.ResultScreenDialog
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CalculatorScreen(navController: NavController) {
@@ -38,12 +40,23 @@ fun CalculatorScreen(navController: NavController) {
     val dairyConsumptionError by viewModel.dairyConsumptionError.collectAsState()
 
     val showSuccessMessage by viewModel.showSuccessMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Estado para controlar a exibição do diálogo de resultado
+    var showResultDialog by remember { mutableStateOf(false) }
+
+    // Estado para armazenar o resultado da pegada de carbono
+    var totalFootprint by remember { mutableStateOf(0.0) }
 
     // Scroll state para permitir rolagem
     val scrollState = rememberScrollState()
 
     // Cor dos cards (verde escuro do gradiente)
     val cardColor = colorResource(id = R.color.greendarker_system)
+
+    // CoroutineScope para chamadas assíncronas
+    val coroutineScope = rememberCoroutineScope()
 
     // Feedback visual de sucesso
     if (showSuccessMessage) {
@@ -60,6 +73,38 @@ fun CalculatorScreen(navController: NavController) {
                     Text("OK")
                 }
             }
+        )
+    }
+
+    // Feedback visual de erro
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.resetErrorMessage() },
+            title = { Text("Erro") },
+            text = { Text(errorMessage!!) },
+            confirmButton = {
+                Button(onClick = { viewModel.resetErrorMessage() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    // Indicador de carregamento
+    if (isLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("Calculando...") },
+            text = { CircularProgressIndicator() },
+            confirmButton = { }
+        )
+    }
+
+    // Exibe o diálogo de resultado se showResultDialog for true
+    if (showResultDialog) {
+        ResultScreenDialog(
+            totalFootprint = totalFootprint,
+            onDismiss = { showResultDialog = false } // Fecha o diálogo
         )
     }
 
@@ -243,7 +288,19 @@ fun CalculatorScreen(navController: NavController) {
             // Botão de calcular
             Spacer(modifier = Modifier.height(16.dp))
             ComponentButton(
-                onClick = { viewModel.calculateCarbonFootprint() },
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.calculateCarbonFootprint(
+                            onSuccess = { footprint ->
+                                totalFootprint = footprint // Armazena o resultado
+                                showResultDialog = true // Exibe o diálogo
+                            },
+                            onError = { error ->
+                                viewModel.setErrorMessage()
+                            }
+                        )
+                    }
+                },
                 text = "Calcular",
                 modifier = Modifier.fillMaxWidth(),
                 backgroundColor = cardColor, // Cor do botão igual aos cards
