@@ -115,7 +115,9 @@ fun CalculatorScreen(navController: NavController) {
         TopFrame(
             onCalculadoraClick = { /* Navega para a tela de calculadora (já estamos aqui) */ },
             onDesafiosClick = { navController.navigate("desafios") },
-            onProgressoClick = { navController.navigate("progresso") }
+            onProgressoClick = { navController.navigate("progresso") },
+            onHomeClick = { navController.navigate("home") },
+            onTipsClick = { navController.navigate("dicas") }
         )
 
         // Conteúdo da calculadora com rolagem

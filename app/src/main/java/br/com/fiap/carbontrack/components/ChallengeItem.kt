@@ -65,7 +65,7 @@ fun ChallengeItem(
             Image(
                 painter = painterResource(id = iconResId),
                 contentDescription = "Ícone do desafio",
-                modifier = Modifier.size(48.dp) // Tamanho do ícone
+                modifier = Modifier.size(48.dp)
             )
         }
 

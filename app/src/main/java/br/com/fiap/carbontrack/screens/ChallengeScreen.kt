@@ -21,7 +21,9 @@ import br.com.fiap.carbontrack.components.ChallengeItem
 fun ChallengeScreen(
     onNavigateToCalculadora: () -> Unit,
     onNavigateToDesafios: () -> Unit,
-    onNavigateToProgresso: () -> Unit
+    onNavigateToProgresso: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToTips: () -> Unit
 ) {
     // Lista de desafios sustentáveis
     val desafios = listOf(
@@ -40,7 +42,9 @@ fun ChallengeScreen(
         TopFrame(
             onCalculadoraClick = onNavigateToCalculadora,
             onDesafiosClick = onNavigateToDesafios,
-            onProgressoClick = onNavigateToProgresso
+            onProgressoClick = onNavigateToProgresso,
+            onHomeClick = onNavigateToHome,
+            onTipsClick = onNavigateToTips
         )
 
         // Título da seção de desafios

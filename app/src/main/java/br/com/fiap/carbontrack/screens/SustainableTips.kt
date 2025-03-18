@@ -6,19 +6,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -31,43 +35,42 @@ import br.com.fiap.carbontrack.R
 import br.com.fiap.carbontrack.components.TopFrame
 
 @Composable
-fun HomeScreen(
+fun SustainableTips(
     onNavigateToCalculator: () -> Unit,
-    onNavigateToChallenges: () -> Unit,
+    onNavigateToChallenge: () -> Unit,
     onNavigateToProgress: () -> Unit,
     onNavigateToHome: () -> Unit,
     onNavigateToTips: () -> Unit
 ) {
-    // Lista de cards da Home
-    val homeCards = listOf(
-        HomeCard(R.drawable.calculator, "Calculadora", onNavigateToCalculator),
-        HomeCard(R.drawable.bulb, "Dicas", onNavigateToTips),
-        HomeCard(R.drawable.target, "Desafios", onNavigateToChallenges),
-        HomeCard(R.drawable.progress, "Progresso", onNavigateToProgress)
+    // Lista de cards sustentáveis
+    val tips = listOf(
+        Tip(R.drawable.tree, "Plante uma árvore"),
+        Tip(R.drawable.ic_recycle, "Separe o lixo reciclável"),
+        Tip(R.drawable.ic_shower, "Economize água no banho"),
+        Tip(R.drawable.fuel, "Use transporte sustentável"),
+        Tip(R.drawable.burguer, "Reduza o consumo de carne"),
+        Tip(R.drawable.ic_recycle, "Use sacolas reutilizáveis")
     )
 
     // Layout da página
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-
         TopFrame(
             onCalculadoraClick = onNavigateToCalculator,
-            onDesafiosClick = onNavigateToChallenges,
+            onDesafiosClick = onNavigateToChallenge,
             onProgressoClick = onNavigateToProgress,
             onHomeClick = onNavigateToHome,
             onTipsClick = onNavigateToTips
         )
 
-        // Título da Home
         Text(
-            text = "Home",
+            text = "Dicas Sustentáveis",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
             modifier = Modifier.padding(16.dp)
         )
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,64 +80,78 @@ fun HomeScreen(
 
 
 
-        // Grade de cards (2 colunas)
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        // Lista de cards
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(homeCards) { card ->
-                HomeCardItem(card)
+            items(tips) { tip ->
+                SustainableTipCard(tip)
             }
         }
-    }}
+        }
+    }
 }
 
-// Data class para representar um card da Home
-data class HomeCard(
+// Data class para representar um card
+data class Tip(
     val iconResId: Int,
-    val title: String,
-    val onClick: () -> Unit
+    val title: String
 )
 
 @Composable
-fun HomeCardItem(card: HomeCard) {
+fun SustainableTipCard(tip: Tip) {
+    // Estado para controlar se a estrela está preenchida
+    val isStarFilled = remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(100.dp)
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(Color(0xFF76E1BD), Color(0xFF034F49))
                 ),
                 shape = RoundedCornerShape(15.dp)
             )
-            .clickable { card.onClick() } // Navegação ao clicar no card
-            .padding(16.dp),
-        contentAlignment = Alignment.Center // Centraliza o conteúdo do Box
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(), // Ocupa toda a largura do Box
-            horizontalAlignment = Alignment.CenterHorizontally, // Centraliza horizontalmente
-            verticalArrangement = Arrangement.Center // Centraliza verticalmente
+        // Conteúdo do card
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ícone ao centro
+            // Ícone à esquerda
             Image(
-                painter = painterResource(id = card.iconResId),
-                contentDescription = card.title,
-                modifier = Modifier.size(50.dp)
+                painter = painterResource(id = tip.iconResId),
+                contentDescription = tip.title,
+                modifier = Modifier.size(40.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            // Texto embaixo
+            // Texto à direita
             Text(
-                text = card.title,
+                text = tip.title,
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally) // Garante que o texto esteja centralizado
+                color = Color.White
+            )
+        }
+
+        // Estrela no canto superior direito
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .clickable { isStarFilled.value = !isStarFilled.value }
+        ) {
+            Icon(
+                painter = painterResource(
+                    id = if (isStarFilled.value) R.drawable.ic_star_filled else R.drawable.ic_star_outlined
+                ),
+                contentDescription = "Favorito",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
             )
         }
     }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DropdownMenu
@@ -37,7 +36,9 @@ import br.com.fiap.carbontrack.ui.theme.Pridi // Importe a fonte Pridi
 fun TopFrame(
     onCalculadoraClick: () -> Unit,
     onDesafiosClick: () -> Unit,
-    onProgressoClick: () -> Unit
+    onProgressoClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onTipsClick: () -> Unit
 ) {
     // Estado para controlar a visibilidade do menu
     val menuExpanded = remember { mutableStateOf(false) }
@@ -55,15 +56,14 @@ fun TopFrame(
         end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
     )
 
-    // Box que contém o gradiente, o menu, o texto e a logo
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp) // Altura do frame
+            .height(80.dp)
             .background(gradientBrush),
         contentAlignment = Alignment.Center
     ) {
-        // Usamos um Row para alinhar o ícone do menu, o texto e a logo horizontalmente
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -86,18 +86,20 @@ fun TopFrame(
                 fontSize = 32.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                fontFamily = Pridi, // Usa a fonte Pridi
+                fontFamily = Pridi,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .weight(1f) // Ocupa o espaço restante
-                    .padding(horizontal = 8.dp) // Espaço entre o texto e a logo
+                    .weight(1f)
+                    .padding(horizontal = 5.dp)
+                    .clickable { onHomeClick() }
             )
 
             // Logo
             Image(
-                painter = painterResource(id = R.drawable.logo), // Substitua pelo seu recurso de logo
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo CarbonTrack",
-                modifier = Modifier.size(40.dp) // Tamanho da logo
+                modifier = Modifier.size(40.dp),
+
             )
         }
 
@@ -131,6 +133,14 @@ fun TopFrame(
                 onClick = {
                     menuExpanded.value = false // Fecha o menu
                     onProgressoClick() // Executa a ação
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Dicas Sustentáveis") },
+                onClick = {
+                    menuExpanded.value = false // Fecha o menu
+                    onTipsClick()
                 }
             )
         }
